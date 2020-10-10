@@ -1,6 +1,5 @@
 import React, {Component} from 'react'
-import Send from './send'
-import Media from './media'
+import {Send, Media} from './icons'
 import autosize from 'autosize'
 
 import axios from 'axios';
@@ -11,8 +10,11 @@ class Dashboard extends Component {
   constructor(props) {
     super(props)
     this.state = {
+      groupid: props.currentgroupid,
+      groupname: "",
+      groupimage: "",
+      about: "",
       chats: [],
-      groupid: "5f78292c97f25506f8ddf677",
       doc: "",
       currentMessage: {
         text: "",
@@ -27,6 +29,16 @@ class Dashboard extends Component {
     }
   }
 
+  componentWillReceiveProps(nextProps) {
+    // console.log("Receiving", nextProps);
+    this.setState({
+      groupid: nextProps.currentgroupid,
+      
+    }, () => {
+      this.afterprops()
+    });
+  }
+
   showpdf(ele) {
     if (this.state.popuppdf == 0) {
       this.setState({doc: ele.target.getAttribute('link'), popuppdf: 1})
@@ -35,14 +47,35 @@ class Dashboard extends Component {
     }
   }
 
+  addmessage(message) {
+    if (this.state.groupid == null) {
+      // console.log("Adding new message terminated");
+      return
+    }
+    // console.log("Adding message");
+    axios({
+      url: `${blueapi}/groups/${this.state.groupid}/addmessage`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data: JSON.stringify({'message': message})
+    }).then(res => {
+      console.log(res.data);
+    }).catch(err => {
+      console.log("Error");
+      console.log(err);
+    });
+  }
+
   sendmessage() {
     console.log("sendmessage");
     // console.log(this.state.currentMessage);
     var chats = this.state.chats
     var chat = {
-      "by": "self",
-      "user": "Ninja",
-      "img": "img/post/iron.jpg",
+      "user": this.props.user.name,
+      "img": this.props.user.image,
+      "userid": this.props.user._id,
       "messages": []
     }
 
@@ -74,6 +107,7 @@ class Dashboard extends Component {
     if (chat.messages.length) {
       console.log("we are in");
       chats.push(chat)
+      this.addmessage(chat)
       this.setState({
         chats: chats,
         currentMessage: {
@@ -87,6 +121,7 @@ class Dashboard extends Component {
       }, () => {
         // console.log(this.state.);
         document.querySelector('#typemessage').value = ""
+        document.querySelector('#typemessage').style.height = "16px"
         setTimeout(() => {
           var chatscreen = document.querySelector('#chats')
           chatscreen.scrollTo({top: document.body.scrollHeight})
@@ -127,33 +162,53 @@ class Dashboard extends Component {
     this.setState({currentMessage: currentMessage})
   }
 
-  loadchats(){
-    axios.get(
-        `${blueapi}/groups/${this.state.groupid}`
-      )
-      .then(res => res.json())
-      .then(res => {
-        console.log(res);
-        // this.setState({brands: res.data.result})
+  loadchats() {
+    if (this.state.groupid == null) {
+      // console.log("Loading chats terminated");
+      return
+    }
+    // console.log("Loading chats");
+    axios.get(`${blueapi}/groups/${this.state.groupid}`).then(res => {
+      this.setState({
+        groupname: res.data.result.name,
+        groupimage: res.data.result.groupimage,
+        about: res.data.result.about,
+        chats: res.data.result.messages
+      }, () => {
+        // console.log(this.state);
       })
-      .catch(err => {
-        console.log("Error");
-        console.log(err);
-      });
-  }
-
-  componentDidMount() {
-    setTimeout(() => {
-      var chatscreen = document.querySelector('#chats')
-      chatscreen.scrollTo({top: document.body.scrollHeight})
-    }, 100)
-    var ta = document.querySelector('#typemessage');
-    ta.addEventListener('focus', function() {
-      autosize(ta);
+    }).catch(err => {
+      console.log("Error");
+      console.log(err);
     });
   }
 
+  componentWillMount() {
+    this.loadchats()
+  }
+
+  afterprops() {
+    setTimeout(() => {
+      var chatscreen = document.querySelector('#chats')
+      if (chatscreen) {
+        chatscreen.scrollTo({top: document.body.scrollHeight})
+      }
+    }, 100)
+    var ta = document.querySelector('#typemessage');
+    if (ta) {
+      ta.addEventListener('focus', function() {
+        autosize(ta);
+      });
+    }
+    this.loadchats()
+  }
+
+  componentDidMount() {
+    this.afterprops()
+  }
+
   render() {
+    console.log("Rendering desktop");
     return (<div className="dashboard container">
       <div className={this.state.popuppdf
           ? "messagepdf showpdf"
@@ -189,20 +244,24 @@ class Dashboard extends Component {
           <button onClick={this.addmedia.bind(this)}>Add</button>
         </div>
       </div>
+
       <div className="screen">
         <div className="groupinfo">
-          <img src="img/prof.jpg" alt="" className="circle"/>
+          <img src={this.state.groupimage} alt="" className="circle"/>
           <div className="info">
-            <span className="titlename">Web development</span>
-            <span className="members">33 memebers</span>
+            <span className="titlename">{this.state.groupname}</span>
+            <span className="members">{this.state.about}</span>
           </div>
         </div>
 
         <div className="chatscreen">
           <div className="chats" id="chats">
             {
-              this.state.chats.map(chat => {
-                return (<div key={Math.random() * 1000000000000} className={"chat " + chat.by}>
+              this.state.chats.map((chat, i) => {
+                chat.by = chat.userid == this.props.user._id
+                  ? "self"
+                  : "someone"
+                return (<div key={i} className={"chat " + chat.by}>
                   {
                     chat.by == "someone"
                       ? <img className="senderimage" src={chat.img} alt=""/>
@@ -216,12 +275,12 @@ class Dashboard extends Component {
                     }
                     <span className="message">
                       {
-                        chat.messages.map(message => {
+                        chat.messages.map((message, idx) => {
                           switch (message.type) {
                             case 'text':
-                              return <span key={Math.random() * 1000000000000}>{message.message}</span>
+                              return <pre key={idx}>{message.message}</pre>
                             case 'pdf':
-                              return (<div key={Math.random() * 1000000000000} className="msgpdf" onClick={this.showpdf.bind(this)} link={message.src}>
+                              return (<div key={idx} className="msgpdf" onClick={this.showpdf.bind(this)} link={message.src}>
                                 <img link={message.src} src="https://img.icons8.com/windows/64/000000/happy-document.png"/>
                                 <div className="pdfdetails" link={message.src}>
                                   <div className="pdfname" link={message.src}>{message.name}</div>
@@ -229,13 +288,13 @@ class Dashboard extends Component {
                                 </div>
                               </div>)
                             case 'img':
-                              return <img key={Math.random() * 1000000000000} className="messageimg" src={message.src} alt=""/>
+                              return <img key={idx} className="messageimg" src={message.src} alt=""/>
                             case 'url':
-                              return <a key={Math.random() * 1000000000000} href={message.href} target="_blank">{message.href}</a>
+                              return <a key={idx} href={message.href} target="_blank">{message.href}</a>
                             case 'vid':
-                              return <video key={Math.random() * 1000000000000} src={message.src} controls="controls" autoPlay={false}/>
+                              return <div key={idx} className="videotab"><video src={message.src} controls="controls" autoPlay={false}/></div>
                             case 'aud':
-                              return <div key={Math.random() * 1000000000000}><br/><audio key={Math.random() * 1000000000000} src={message.src} controls="controls" autoPlay={false}/></div>
+                              return <div key={idx}><br/><audio key={Math.random() * 1000000000000} src={message.src} controls="controls" autoPlay={false}/></div>
                             default:
                               return null
                           }

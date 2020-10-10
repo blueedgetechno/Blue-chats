@@ -1,25 +1,68 @@
 import React, { Component } from 'react'
+import {Logout} from './icons'
+
+import axios from 'axios';
+
+const blueapi = process.env.REACT_APP_API
 
 class Groups extends Component {
-  render(){
-    var chats = []
-    for (var i = 0; i < 2; i++) {
-      chats.push({titlename: "Web development", quickpeek: "Refactoring PHP https://bit.ly/2F0WYdt #php #refactoring"})
+  constructor(props) {
+    super(props)
+    this.state = {
+      currentgroupid : "",
+      groups : []
     }
+  }
+
+  changethecurrentgroup(ele){
+    if(ele){
+      // console.log(ele.target.getAttribute('groupid'));
+      this.setState({currentgroupid: ele.target.getAttribute('groupid')},()=>{
+        // console.log(this.state);
+      })
+      this.props.changecurrentgroup(ele.target.getAttribute('groupid'))
+    }
+  }
+
+  loadgroups(){
+    axios.get(
+        `${blueapi}/groups/`
+      )
+      .then(res => {
+        // console.log(res.data);
+        this.setState({groups : res.data.result})
+        // this.setState({brands: res.data.result})
+      })
+      .catch(err => {
+        console.log("Error");
+        console.log(err);
+      });
+  }
+
+  componentDidMount(){
+    this.loadgroups()
+  }
+
+  render(){
     return (
       <div className="container groupcontainer">
         <div className="column sidebar">
             <div className="chatheading">
               <span>Groups</span>
+              <div onClick={this.props.logout}><Logout/></div>
             </div>
             <div className="collection grouplist">
-              {chats.map(chat=>{
+              {this.state.groups.map((group,i)=>{
                 return (
-                  <div key={Math.floor(Math.random()*100000)} className="collection-item avatar">
-                    <img src="img/post/mac.jpg" alt="" className="circle"/>
-                    <div className="info">
-                      <span className="titlename">{chat.titlename}</span>
-                      <span className="quickpeek">{chat.quickpeek.slice(0,35)+"..."}</span>
+                  <div key={i}
+                    className={this.state.currentgroupid==group._id ? "collection-item avatar selectedgroup":"collection-item avatar"}
+                    groupid={group._id}
+                    onClick={this.changethecurrentgroup.bind(this)}
+                    >
+                    <img groupid={group._id} src={group.groupimage} alt="" className="circle"/>
+                    <div groupid={group._id} className="info">
+                      <span groupid={group._id} className="titlename">{group.name}</span>
+                      <span groupid={group._id} className="quickpeek">{group.about.slice(0,52)+"..."}</span>
                     </div>
                   </div>
                 )

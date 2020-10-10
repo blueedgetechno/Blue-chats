@@ -1,4 +1,5 @@
 @import url(https://fonts.googleapis.com/css?family=Montserrat:400,700);
+@import url(https://fonts.googleapis.com/css?family=Poppins);
 
 #root {
   margin: 0;
@@ -9,6 +10,7 @@
 
 * {
   outline: none;
+  // position: relative;
 }
 
 .display {
@@ -30,14 +32,10 @@
   border-right: 2px solid #a3a3a3;
   height: 100vh;
   overflow-y: scroll;
-}
 
-.sidebar::-webkit-scrollbar {
-  width: 0px;
-}
-
-.chats::-webkit-scrollbar {
-  width: 0px;
+  &::-webkit-scrollbar {
+    width: 0;
+  }
 }
 
 .chatheading {
@@ -46,25 +44,25 @@
   flex-direction: column;
   align-items: center;
   border-bottom: 2px solid rgba(54, 50, 50, 0.79);
-}
 
-.chatheading span {
-  font-size: 1.5em;
-  font-weight: 900;
-  color: rgba(18, 19, 28, 0.83);
+  span {
+    font-size: 1.5em;
+    font-weight: 900;
+    color: rgba(18, 19, 28, 0.83);
+  }
 }
 
 .collection-item {
   display: flex;
-  margin: 10px 0;
+  margin: 0;
   font-family: "Montserrat", sans-serif;
-}
 
-.collection-item img {
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  border: solid 4px #2d2d30;
+  img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: solid 3px #2d2d30;
+  }
 }
 
 .avatar {
@@ -73,8 +71,12 @@
   cursor: pointer;
 }
 
-.avatar:nth-child(even) {
+.selectedgroup {
   background: rgba(213, 213, 213, 0.74);
+
+  .quickpeek {
+    color: #aaa;
+  }
 }
 
 .info {
@@ -95,6 +97,7 @@
   color: #7c7878;
   word-wrap: break-word;
   word-break: break-all;
+  overflow-y: hidden;
 }
 
 .screen {
@@ -103,27 +106,33 @@
   height: 100vh;
 }
 
+.emptyscreen {
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
 .groupinfo {
   display: flex;
   flex-direction: row;
   padding: 5px 20px;
   background: #323944;
-}
 
-.groupinfo .titlename {
-  color: #ededed;
+  .titlename {
+    color: #ededed;
+  }
+
+  img {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: solid 4px #25252d;
+  }
 }
 
 .members {
   color: #dbdbdb;
   font-size: 0.8em;
-}
-
-.groupinfo img {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: solid 4px #25252d;
 }
 
 .chatscreen {
@@ -139,16 +148,20 @@
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
+
+  &::-webkit-scrollbar {
+    width: 0;
+  }
 }
 
 .chat {
   position: relative;
   display: flex;
   flex-direction: row;
-}
 
-.chat:nth-last-child(1) {
-  margin-bottom: 130px;
+  &:nth-last-child(1) {
+    margin-bottom: 130px;
+  }
 }
 
 .senderimage {
@@ -164,7 +177,7 @@
   flex-direction: column;
   max-width: 450px;
   margin: 5px;
-  border-radius: 20px;
+  border-radius: 15px;
   padding: 10px;
   background: rgba(227, 227, 227, 0.77);
 }
@@ -172,15 +185,15 @@
 .self {
   align-self: flex-end;
   margin: 0 15px;
+
+  .chatbody {
+    border-top-right-radius: 0;
+    background: rgba(161, 186, 255, 0.77);
+  }
 }
 
 .someone .chatbody {
   border-top-left-radius: 0;
-}
-
-.self .chatbody {
-  border-top-right-radius: 0;
-  background: rgba(161, 186, 255, 0.77);
 }
 
 .chatuser {
@@ -189,24 +202,32 @@
 }
 
 .message {
+  position: relative;
   margin: 1px;
   /* padding: 5px; */
-}
+  pre {
+    white-space: pre-wrap;
+    font-family: inherit;
+    margin: 0;
+  }
 
-.message a {
-  text-decoration: none;
-  color: #075bcc;
-  word-break: break-all;
-}
+  a {
+    text-decoration: none;
+    color: #075bcc;
+    word-break: break-all;
+  }
 
-.message video {
-  width: 100%;
-  outline: none;
-  margin-top: 10px;
-  border-radius: 10px;
+  .videotab video {
+    position: relative;
+    width: 100%;
+    outline: none;
+    margin-top: 10px;
+    border-radius: 10px;
+  }
 }
 
 .messageimg {
+  position: relative;
   width: 100%;
   height: auto;
   border-radius: 10px;
@@ -226,21 +247,21 @@
   background: rgba(29, 26, 26, 0.83);
   z-index: 10;
   transition: 0.4s;
+
+  iframe {
+    width: 800px;
+    height: 100%;
+    padding: 10px 0;
+    border: none;
+    outline: none;
+    background: rgba(0, 0, 0, 0);
+  }
 }
 
-.showpdf{
+.showpdf {
   visibility: visible !important;
   opacity: 1 !important;
   transition: 0.4s;
-}
-
-.messagepdf iframe {
-  width: 800px;
-  height: 100%;
-  padding: 10px 0;
-  border: none;
-  outline: none;
-  background: rgba(0, 0, 0, 0);
 }
 
 .msgpdf {
@@ -248,7 +269,7 @@
   flex-direction: row;
   vertical-align: middle;
   background: inherit;
-  background-color: rgb(113 113 113 / 16%);
+  background-color: rgba(113, 113, 113, 0.16);
   border-radius: 10px;
   margin-top: 5px;
   cursor: pointer;
@@ -296,33 +317,10 @@
   color: #4e4e4e;
   resize: none;
   outline: none;
-}
 
-#typemessage::-webkit-scrollbar {
-  width: 0px;
-}
-
-#sendbutton,
-#mediabutton{
-  width: 32px;
-  height: 32px;
-  margin: 0 5px 0 15px;
-  fill: #5c7a91;
-  cursor: pointer;
-}
-
-.sendmediabuttoncontainer{
-  position: relative;
-}
-
-.signcircle{
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 12px;
-  height: 12px;
-  background: #e84040;
-  border-radius: 50%;
+  &::-webkit-scrollbar {
+    width: 0;
+  }
 }
 
 .off {

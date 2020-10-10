@@ -1,0 +1,33 @@
+.svgicon{
+  width: 32px;
+  height: 32px;
+  margin: 0 5px 0 15px;
+  fill: #5c7a91;
+  cursor: pointer;
+}
+
+#eyeoff,
+#eyeon {
+  height: 26px;
+  fill: #222;
+  font-weight: 600;
+}
+
+#logout{
+  width: 24px;
+  height: 24px;
+}
+
+.sendmediabuttoncontainer {
+  position: relative;
+}
+
+.signcircle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  background: #e84040;
+  border-radius: 50%;
+}
